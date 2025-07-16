@@ -54,7 +54,7 @@ jobs:
           PGPASSWORD: johannes
 
       - name: Setup database
-        run: APP_ENV=test ruby db/setup.rb
+        run: ruby db/setup.rb APP_ENV=test
 
       - name: Run tests
-        run: APP_ENV=test bundle exec rspec
+        run: bundle exec rspec APP_ENV=test
