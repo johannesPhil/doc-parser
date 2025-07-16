@@ -54,7 +54,21 @@ jobs:
           PGPASSWORD: johannes
 
       - name: Setup database
-        run: ruby db/setup.rb APP_ENV=test
+        env:
+          APP_ENV: test
+          DATABASE_NAME: legal_docs_test
+          DATABASE_USER: johannes
+          DATABASE_PASSWORD: johannes
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+        run: APP_ENV=test ruby db/setup.rb
 
       - name: Run tests
-        run: bundle exec rspec APP_ENV=test
+        env:
+          APP_ENV: test
+          DATABASE_NAME: legal_docs_test
+          DATABASE_USER: johannes
+          DATABASE_PASSWORD: johannes
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+        run: APP_ENV=test bundle exec rspec
