@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:15
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: johannes
+          POSTGRES_PASSWORD: johannes
+          POSTGRES_DB: legal_docs_test
+        options: >-
+          --health-cmd="pg_isready -U johannes"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get install -y libpq-dev
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Setup database
+        run: APP_ENV=test ruby db/setup.rb
+
+      - name: Run tests
+        run: APP_ENV=test bundle exec rspec
