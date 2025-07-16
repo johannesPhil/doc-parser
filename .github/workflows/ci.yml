@@ -39,6 +39,12 @@ jobs:
       - name: Install dependencies
         run: bundle install
 
+      - name: Load .env.test
+        run: |
+          set -o allexport
+          source .env.test
+          set +o allexport
+
       - name: Setup database
         run: APP_ENV=test ruby db/setup.rb
 
