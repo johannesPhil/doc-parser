@@ -1,0 +1,46 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    Ascii85 (2.0.1)
+    afm (0.2.2)
+    bigdecimal (3.2.2)
+    diff-lcs (1.6.2)
+    dotenv (3.1.8)
+    hashery (2.1.2)
+    pdf-reader (2.14.1)
+      Ascii85 (>= 1.0, < 3.0, != 2.0.0)
+      afm (~> 0.2.1)
+      hashery (~> 2.0)
+      ruby-rc4
+      ttfunk
+    pg (1.5.9)
+    rspec (3.13.1)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.5)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.4)
+    ruby-rc4 (0.1.5)
+    rufo (0.18.1)
+    ttfunk (1.8.0)
+      bigdecimal (~> 3.1)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  dotenv
+  pdf-reader
+  pg
+  rspec
+  rufo
+
+BUNDLED WITH
+   2.6.2
