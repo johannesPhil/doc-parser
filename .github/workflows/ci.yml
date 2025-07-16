@@ -45,6 +45,14 @@ jobs:
           source .env.test
           set +o allexport
 
+      - name: Debug Environment Variables
+        run: |
+          echo "APP_ENV=$APP_ENV"
+          echo "DATABASE_NAME=$DATABASE_NAME"
+          echo "DATABASE_HOST=$DATABASE_HOST"
+        env:
+          PGPASSWORD: johannes
+
       - name: Setup database
         run: APP_ENV=test ruby db/setup.rb
 
