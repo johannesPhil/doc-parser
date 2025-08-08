@@ -9,7 +9,9 @@ services:
 
     env_file:
       - .env.docker
-      - .env.test
+
+    environment:
+      - HF_API_KEY=${HF_API_KEY}
 
     # environment:
     # DATABASE_URL: postgres://johannes:johannes@db:5432/legal_docs_db
@@ -22,16 +24,17 @@ services:
     tty: true
 
   db:
-    image: postgres:15
+    image: ankane/pgvector:latest
     container_name: legal-docs-db
     environment:
       POSTGRES_USER: johannes
       POSTGRES_PASSWORD: johannes
-      POSTGRES_DB: postgres
+      POSTGRES_DB: legal_docs_db
     ports:
       - "5432:5432"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data:/var/lib/postgresql/data
 
 volumes:
   postgres-data:

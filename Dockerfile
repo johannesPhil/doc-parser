@@ -3,7 +3,10 @@ FROM ruby:3.2
 
 # Install dependencies
 RUN apt-get update -y \
-  && apt-get install -y --no-install-recommends build-essential libpq-dev \
+  && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    postgresql-client \
   && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
