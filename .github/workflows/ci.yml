@@ -1,31 +1,36 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [master]
+    branches:
+      - dev
+      - master
   pull_request:
-    branches: [master]
+    branches:
+      - dev
 
 jobs:
   test:
+    name: Run Test Suite
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/pull/')
 
     services:
       db:
-        image: postgres:15
+        image: ankane/pgvector:latest
         ports: ["5432:5432"]
         env:
-          POSTGRES_USER: johannes
-          POSTGRES_PASSWORD: johannes
-          POSTGRES_DB: legal_docs_test
+          POSTGRES_USER: ${{ secrets.TEST_DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DATABASE_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.TEST_DATABASE_NAME }}
         options: >-
-          --health-cmd="pg_isready -U johannes"
+          --health-cmd="pg_isready -U ${{ secrets.TEST_DATABASE_USER }}"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Ruby
@@ -39,36 +44,35 @@ jobs:
       - name: Install dependencies
         run: bundle install
 
-      - name: Load .env.test
-        run: |
-          set -o allexport
-          source .env.test
-          set +o allexport
-
-      - name: Debug Environment Variables
-        run: |
-          echo "APP_ENV=$APP_ENV"
-          echo "DATABASE_NAME=$DATABASE_NAME"
-          echo "DATABASE_HOST=$DATABASE_HOST"
-        env:
-          PGPASSWORD: johannes
-
-      - name: Setup database
+      - name: Setup Database
         env:
           APP_ENV: test
-          DATABASE_NAME: legal_docs_test
-          DATABASE_USER: johannes
-          DATABASE_PASSWORD: johannes
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-        run: APP_ENV=test ruby db/setup.rb
+          DATABASE_URL: postgresql://${{ secrets.TEST_DATABASE_USER }}:${{ secrets.TEST_DATABASE_PASSWORD }}@localhost:5432/${{ secrets.TEST_DATABASE_NAME }}
+        run: ruby db/setup.rb
 
-      - name: Run tests
+      - name: Run Tests
         env:
           APP_ENV: test
-          DATABASE_NAME: legal_docs_test
-          DATABASE_USER: johannes
-          DATABASE_PASSWORD: johannes
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-        run: APP_ENV=test bundle exec rspec
+          DATABASE_URL: postgresql://${{ secrets.TEST_DATABASE_USER }}:${{ secrets.TEST_DATABASE_PASSWORD }}@localhost:5432/${{ secrets.TEST_DATABASE_NAME }}
+        run: bundle exec rspec
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy Application
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          APP_ENV: production
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
+        run: |
+          echo "Starting deployment..."
+          # Example: deploy to Heroku
+          # heroku container:push web --app ${{ secrets.HEROKU_APP_NAME }}
+          # heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}

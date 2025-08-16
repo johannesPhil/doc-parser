@@ -5,36 +5,32 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - db
-
+      db:
+        condition: service_healthy
     env_file:
       - .env.docker
 
-    environment:
-      - HF_API_KEY=${HF_API_KEY}
-
-    # environment:
-    # DATABASE_URL: postgres://johannes:johannes@db:5432/legal_docs_db
-    # APP_ENV: docker
-    # DATABASE_NAME: legal_docs_db
-    # DATABASE_USER: johannes
-    # DATABASE_PASSWORD: johannes
-    # DATABASE_HOST: db
-    # DATABASE_PORT: 5432
     tty: true
 
   db:
     image: ankane/pgvector:latest
     container_name: legal-docs-db
+    env_file:
+      - .env.docker
     environment:
-      POSTGRES_USER: johannes
-      POSTGRES_PASSWORD: johannes
-      POSTGRES_DB: legal_docs_db
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
       - "5432:5432"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 2s
+      retries: 5
 
 volumes:
   postgres-data:

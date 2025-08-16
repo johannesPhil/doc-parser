@@ -2,19 +2,8 @@ require_relative "../../db/connection"
 require_relative "../../app/services/embedding_service"
 
 module Services
+  # DocumentServices is responsible for saving document chunks and their embeddings to the database.
   class DocumentServices
-    # def self.save(document)
-    #   conn = db_connection()
-
-    #   conn.exec_params("INSERT INTO documents (title, content) VALUES ($1, $2)", [document[:title], document[:content]])
-
-    #   puts "Document #{document[:title]} saved successfully."
-
-    #   conn.close
-    # rescue PG::Error => e
-    #   puts "Error saving document: #{e.message}"
-    # end
-
     def self.save_chunks(title, chunks)
       conn = db_connection()
 
@@ -24,7 +13,9 @@ module Services
 
         document_id = document[0]["id"].to_i
 
-        chunks.each do |chunk|
+        valid_chunks = chunks.reject { |chunk| chunk[:content].nil? || chunk[:content].strip.empty? }
+
+        valid_chunks.each do |chunk|
           embedding = nil
           attempts = 0
 
@@ -40,7 +31,7 @@ module Services
           transaction.exec_params("INSERT INTO document_chunks (document_id,chunk_number,content,embedding,created_at) VALUES ($1,$2,$3,$4,$5)", [document_id, chunk[:chunk_number], chunk[:content], embedding, timestamp])
         end
 
-        puts "Successfully saved #{chunks.size} chunks with embeddings for document '#{title}'."
+        puts "Successfully saved #{valid_chunks.size} chunks with embeddings for document '#{title}'."
       end
     rescue PG::Error => e
       puts "Error saving chunks: #{e.message}"
